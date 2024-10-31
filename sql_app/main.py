@@ -8,27 +8,22 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
-# Configuration
 DATABASE_URL = "postgresql://root:FicYgVigZbRcK7NTsGs2gGXH@logan.liara.cloud:33574/postgres"
 SECRET_KEY = 'supersecretkey'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Database setup
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# FastAPI instance
 app = FastAPI()
 
 # Security
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# User model
 class User(Base):
     __tablename__ = "users"
     
@@ -36,10 +31,8 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
 
-# Create tables
 Base.metadata.create_all(bind=engine)
 
-# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -47,7 +40,6 @@ def get_db():
     finally:
         db.close()
 
-# Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -78,7 +70,6 @@ def register(username: str, password: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already registered")
     return {"message": "User registered successfully"}
 
-# Login endpoint
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form_data.username).first()
@@ -89,7 +80,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Profile endpoint
 @app.get("/profile")
 def read_users_me(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials")
@@ -102,7 +92,6 @@ def read_users_me(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return {"message": "Welcome to your profile"}
 
-# Run the app
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
