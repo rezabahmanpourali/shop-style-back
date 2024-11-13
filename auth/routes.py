@@ -3,7 +3,7 @@ from auth import schemas, crud, jwt
 from auth.models import User
 from sqlalchemy.orm import Session
 from database import get_db
-from auth.jwt import pwd_context
+from auth.jwt import pwd_context,get_current_user
 
 router = APIRouter()
 
@@ -25,3 +25,12 @@ async def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
 
     access_token = jwt.create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/user")
+async def read_user(current_user: User = Depends(get_current_user)):
+    return {
+        "username": current_user.username,
+        "email": current_user.email,
+        "created_at": current_user.created_at,
+    }
