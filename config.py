@@ -1,4 +1,4 @@
 DATABASE_URL = "postgresql://root:FicYgVigZbRcK7NTsGs2gGXH@logan.liara.cloud:33574/postgres"
-SECRET_KEY = 'supersecretkey'
+SECRET_KEY = 'k7Nv5K9R6xFO3IuQvL6b0YqYHjFQWKh65ltPhSm9YXk'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

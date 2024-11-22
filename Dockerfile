@@ -16,4 +16,4 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 # Set the command to run the project using uvicorn
-CMD ["uvicorn", "sql_app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from auth import schemas, crud, jwt
-from auth.models import User
+from src.auth import schemas, crud, jwt
+from src.auth.models import User
 from sqlalchemy.orm import Session
 from database import get_db
-from auth.jwt import pwd_context,get_current_user
+from src.auth.jwt import pwd_context,get_current_user
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -17,20 +18,22 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     access_token = jwt.create_access_token(data={"sub": new_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
 @router.post("/login")
-async def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
-    if not db_user or not pwd_context.verify(user.password, db_user.password):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    username = form_data.username
+    password = form_data.password
+
+    db_user = db.query(User).filter(User.username == username).first()
+    if not db_user or not pwd_context.verify(password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = jwt.create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-
 @router.get("/user")
 async def read_user(current_user: User = Depends(get_current_user)):
     return {
         "username": current_user.username,
-        "email": current_user.email,
-        "created_at": current_user.created_at,
+        "created_at": current_user.id,
     }
