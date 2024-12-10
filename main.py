@@ -1,17 +1,35 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.auth.routes import router as auth_router
 from src.category.routes import router as category_router
 from src.product.routes import router as product_router
+from src.banners.routes import router as banners_router
 from database import Base, engine
+from fastapi.staticfiles import StaticFiles
 
 target_metadata = Base.metadata 
 app = FastAPI()
 
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  
+    allow_credentials=True, 
+    allow_methods=["*"],  
+    allow_headers=["*"],
+)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 app.include_router(category_router, prefix="/categories", tags=["Categories"])
 app.include_router(product_router, prefix="/products", tags=["Products"])
+app.include_router(banners_router, prefix="/banners", tags=["Banners"])
 
 # # main.py
 # from fastapi import FastAPI

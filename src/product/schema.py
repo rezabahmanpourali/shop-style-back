@@ -1,26 +1,15 @@
+from fastapi import UploadFile, File
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from enum import Enum
 
-class Seasons(str, Enum):
+
+class SeasonEnum(str, Enum):
     spring = "spring"
     summer = "summer"
     autumn = "autumn"
     winter = "winter"
 
-class SizeType(str, Enum):
-    clothing = "clothing"
-    shoes = "shoes"
-
-class SizeBase(BaseModel):
-    value: str
-    size_type: SizeType
-
-class SizeRead(SizeBase):
-    id: int
-
-    class Config:
-        orm_mode = True
 
 class ProductBase(BaseModel):
     name: str
@@ -29,15 +18,17 @@ class ProductBase(BaseModel):
     category_id: int
     is_special_offer: Optional[bool] = False
     discount: Optional[int] = 0
+    sizes: Optional[str] = None
+    season: SeasonEnum
+
 
 class ProductCreate(ProductBase):
-    sizes: List[int]  
-    seasons: List[Seasons] 
+    image: Optional[UploadFile] = None
+
 
 class ProductRead(ProductBase):
     id: int
-    sizes: List[SizeRead] 
-    seasons: List[Seasons]
+    image_path: Optional[str] = None
 
     class Config:
         orm_mode = True

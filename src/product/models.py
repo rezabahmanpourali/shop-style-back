@@ -1,54 +1,14 @@
-from sqlalchemy import (
-    Column, Integer, String, ForeignKey, Float, Boolean, Table, Enum
-)
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
-class SizeType(enum.Enum):
-    CLOTHING = "clothing"
-    SHOES = "shoes" 
-
 class SeasonEnum(enum.Enum):
-    spring = 'spring'
-    summer = 'summer'
-    autumn = 'autumn'
-    winter = 'winter'
-
-
-product_season_association = Table(
-    "product_season_association",
-    Base.metadata,
-    Column("product_id", Integer, ForeignKey("products.id"), primary_key=True),
-    Column("season_id", Integer, ForeignKey("seasons.id"), primary_key=True)
-)
-
-
-class Season(Base):
-    __tablename__ = "seasons"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(Enum(SeasonEnum, name="seasons_enum"), nullable=False, unique=True)  
-
-    products = relationship(
-        "Product", secondary=product_season_association, back_populates="seasons"
-    )
-
-class Size(Base):
-    __tablename__ = "sizes"
-
-    id = Column(Integer, primary_key=True, index=True)
-    value = Column(String, nullable=False) 
-    size_type = Column(Enum(SizeType), nullable=False) 
-
-    products = relationship("Product", secondary="product_size_association", back_populates="sizes")
-
-product_size_association = Table(
-    "product_size_association",
-    Base.metadata,
-    Column("product_id", Integer, ForeignKey("products.id"), primary_key=True),
-    Column("size_id", Integer, ForeignKey("sizes.id"), primary_key=True)
-)
+    spring = "spring"
+    summer = "summer"
+    autumn = "autumn"
+    winter = "winter"
 
 class Product(Base):
     __tablename__ = "products"
@@ -56,17 +16,89 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
-    discount = Column(Integer, default=0) 
+    discount = Column(Integer, default=0)
     description = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-
-    model = Column(String, nullable=True)
+    sizes = Column(String, nullable=True)
+    season = Column(Enum(SeasonEnum, name="seasons_enum"), nullable=False)
+    image_path = Column(String, nullable=True)
     is_special_offer = Column(Boolean, default=False)
 
     category = relationship("Category", back_populates="products")
-    seasons = relationship(
-        "Season", secondary=product_season_association, back_populates="products"
-    )
-    sizes = relationship(
-        "Size", secondary=product_size_association, back_populates="products"
-    )
+
+    # models = relationship("ModelProduct", back_populates="product")
+
+# from sqlalchemy import Column, Integer, String
+# from sqlalchemy.orm import relationship
+# from database import Base
+
+# class Model(Base):
+#     __tablename__ = "models"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String, nullable=False)
+#     image_path = Column(String, nullable=False)
+#     description = Column(String, nullable=True)
+
+#     products = relationship("ModelProduct", back_populates="model")
+
+# from sqlalchemy import Column, Integer, ForeignKey
+# from sqlalchemy.orm import relationship
+# from database import Base
+
+# class ModelProduct(Base):
+#     __tablename__ = "model_products"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     model_id = Column(Integer, ForeignKey("models.id"), nullable=False)
+#     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+
+#     model = relationship("Model", back_populates="products")
+#     product = relationship("Product", back_populates="models")
+
+
+#     from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+# from sqlalchemy.orm import relationship
+# from database import Base
+# from sqlalchemy.types import Enum
+# from src.product.enums import SeasonEnum
+
+# class ProductColor(Base):
+#     __tablename__ = "product_colors"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+#     color_name = Column(String, nullable=False)
+#     color_code = Column(String, nullable=True)
+
+#     product = relationship("Product", back_populates="colors")
+#     sizes = relationship("ProductSize", back_populates="color", cascade="all, delete-orphan")
+
+
+# class ProductSize(Base):
+#     __tablename__ = "product_sizes"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     color_id = Column(Integer, ForeignKey("product_colors.id"), nullable=False)
+#     size = Column(String, nullable=False)
+#     quantity = Column(Integer, default=0)
+
+#     color = relationship("ProductColor", back_populates="sizes")
+
+
+# class Product(Base):
+#     __tablename__ = "products"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String, nullable=False)
+#     price = Column(Integer, nullable=False)
+#     discount = Column(Integer, default=0)
+#     description = Column(String, nullable=True)
+#     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+#     model = Column(String, nullable=True)
+    # is_special_offer = Column(Boolean, default=False)
+#     season = Column(Enum(SeasonEnum, name="seasons_enum"), nullable=False)
+#     image_path = Column(String, nullable=True)
+
+#     colors = relationship("ProductColor", back_populates="product", cascade="all, delete-orphan")
+#     category = relationship("Category", back_populates="products")
